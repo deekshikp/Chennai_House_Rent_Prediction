@@ -1,0 +1,343 @@
+---
+title: "Chennai House Rent Prediction"
+author: 'Team: Deekshitha K P, Ashifa Thaniya J R, Surekha K'
+date: "2024-06-29"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+```
+
+# Chennai House Rent Prediction
+
+Chennai is considered to be one of the fastest growing cities in India. With its rising population and opportunity attracts people from all parts of the country. Though Chennai is the land of opportunities not everyone could own a house here. That's when renting comes into play.
+
+Renting, also known as hiring or letting, is an agreement where a payment is made for the temporary use of a good, service, or property owned by another. A gross lease is when the tenant pays a flat rental amount and the landlord pays for all property charges regularly incurred by the ownership. Renting can be an example of the sharing economy.
+
+The Human Rights Measurement Initiative finds that India is doing 60.9% of what should be possible at its level of income for the right to housing.
+
+In our project we use data science process to better predict the rental prices for various houses with respect to location/area, size, BHK, furnishing and other parameters.
+        
+
+#### __The Data Science Process__
+
+The Key steps in data science process are as follows:
+
+1. Problem Definition
+2. Data Collection
+3. Data Processing
+4. Exploratory Data Analysis(EDA)
+     + Descriptive Statistics
+     + Visualizations
+5. Modeling
+     + Building the model
+     + Evaluating the model
+6. Interpreting the results
+
+
+
+## Project Definition
+
+The Objective of the project is to perform Exploratory Data Analysis and build machine learning models and data science processes to better predict the rental prices for various houses with respect to various variables like location/area, size, BHK, furnishing and other parameters.
+
+
+## Data Collection
+
+The Dataset is created from website called [magicbricks.com](https://www.magicbricks.com/). 
+
+In this Dataset, we have information on almost 4700+ Houses/Apartments/Flats Available for Rent with different parameters like BHK, Rent, Size, No. of Floors, Area Type, Area Locality, City, Furnishing Status, Type of Tenant Preferred, No. of Bathrooms, Point of Contact.
+
+#### Dataset Glossary (Column-Wise)
+
+* BHK: Number of Bedrooms, Hall, Kitchen.
+* Rent: Price of the Houses/Apartments/Flats.
+* Size: Size of the Houses/Apartments/Flats in Square Feet.
+* Floor: Houses/Apartments/Flats situated in which Floor
+* Area Type: Size of the Houses/Apartments/Flats calculated on either Super Area or Carpet Area or Build Area.
+* Area Locality: Locality of the Houses/Apartments/Flats.
+* City: City where the Houses/Apartments/Flats are Located.
+* Furnishing Status: Furnishing Status of the Houses/Apartments/Flats, either it is Furnished or Semi-Furnished or Unfurnished.
+* Tenant Preferred: Type of Tenant Preferred by the Owner or Agent.
+* Bathroom: Number of Bathrooms.
+* Point of Contact: Whom should you contact for more information regarding the Houses/Apartments/Flats.
+
+
+```{r source_data, include=FALSE}
+library(tidyverse)
+Rent.data<- data.frame(read.csv("House_Rent_Dataset.csv"))
+tibble(Rent.data)
+```
+
+## Data Processing
+ 
+  The Dataset has information about 10 major cities of the country. But we only need information for the city Chennai. So we create a subset of the dataset with Chennai as its City.
+  
+  
+```{r filtered_data, echo=FALSE}
+Chennai_rent <- Rent.data %>% dplyr::filter(City=="Chennai")
+tibble(Chennai_rent)
+```
+We now check the dimensions and structure of the dataset.
+```{r str, include=FALSE}
+#Checking the shape of dataset
+dim(Chennai_rent)
+
+#Checking the structure of dataset
+str(Chennai_rent)
+```
+We now have our filtered dataset with 891 rows and 12 columns. Here area type, BHK, point of contact, Tenants preferred, furniture can be represented as factors.
+```{r factors, include=FALSE}
+Chennai_rent$BHK=as.factor(Chennai_rent$BHK)
+Chennai_rent$Area.Type=as.factor(Chennai_rent$Area.Type)
+Chennai_rent$Tenant.Preferred = as.factor(Chennai_rent$Tenant.Preferred)
+Chennai_rent$Furnishing.Status=as.factor(Chennai_rent$Furnishing.Status)
+Chennai_rent$Point.of.Contact=as.factor(Chennai_rent$Point.of.Contact)
+str(Chennai_rent)
+```
+We now check for any null values and finally drop the unnecessary columns [Posted On, Floor, City]
+```{r subset_chenna, echo=FALSE}
+chennai=subset(Chennai_rent, select = -c(Posted.On , Floor , City))
+tibble(chennai)
+```
+
+Finally we have processed the dataset and we are now ready to perform Exploratory Data Analysis over it.
+
+
+## Exploratory Data Analysis(EDA)
+
+Before performing EDA we need to understand the variables of the dataset. To keep it short Rent is the dependent variable in the dataset whereas all other variables act as independent variables.
+
+#### Descriptive Statistics
+
+```{r}
+#Mean
+mean=mean(chennai$Rent)
+mean
+
+#Median
+median=median(chennai$Rent)
+median
+
+#Minimum
+minimum=min(chennai$Rent)
+minimum
+
+#Maximum
+maximum=max(chennai$Rent)
+maximum
+
+#Top 5 high rent
+head(sort(chennai$Rent, decreasing = TRUE), n=5)
+  
+#Top 5 low rent
+head(sort(chennai$Rent, decreasing = FALSE), n=5)
+
+summary(chennai$Rent)
+```
+
+
+__Outlier Detection__
+```{r}
+ggplot(data=chennai, aes(x=Rent,y="" )) + geom_point(color="purple")
+```
+
+__Outlier Removal__
+```{r}
+chennai=filter(chennai,Rent<300000)
+dim(chennai)
+```
+
+
+#### Bar plot on furnishing status
+```{r}
+library(ggplot2)
+ggplot(chennai, mapping = aes(x=Furnishing.Status)) + geom_bar( fill = "purple", width=0.5)
+```
+#### Bar plot on Types of Tenants preferred
+```{r}
+
+ggplot(chennai, mapping = aes(x=Tenant.Preferred)) + geom_bar( fill = "purple", width=0.5)
+```
+###Bar plot on Point of contact
+```{r}
+ggplot(chennai, mapping = aes(x=Point.of.Contact)) + geom_bar( fill = "purple", width=0.5)
+```
+#Scatter plot on House rents Vs House size
+```{r}
+ggplot(chennai, aes(x=Size, y= Rent)) + geom_point(alpha=0.5, color = "purple")
+```
+#Boxplot on rent prices
+```{r}
+ggplot(chennai, aes(x=Size, y= Rent)) + geom_boxplot(outlier.colour="purple", outlier.shape=16,
+             outlier.size=2, notch=FALSE)
+```
+#Histogram of House size
+```{r}
+ggplot(chennai, aes(x=Size)) + geom_histogram(binwidth = 1.75, color="purple")
+```
+#Distribution of BHK's
+```{r}
+ggplot(chennai, aes(x=BHK)) + geom_bar(fill ="purple")
+```
+#Distribution on Number of bathrooms available
+```{r}
+ggplot(chennai, aes(x=Bathroom)) + geom_histogram(binwidth = 1, fill="purple")
+```
+#word cloud
+```{r}
+
+#Word cloud on Area Locality
+
+
+# Load the packages
+library("tm")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+
+# To choose the text file
+text = readLines("area.txt")
+
+# VectorSource() function 
+# creates a corpus of 
+# character vectors
+docs = Corpus(VectorSource(text))   
+
+# Text transformation
+toSpace = content_transformer(
+  function (x, pattern)
+    gsub(pattern, " ", x))
+docs1 = tm_map(docs, toSpace, "/")
+docs1 = tm_map(docs, toSpace, "@")
+docs1 = tm_map(docs, toSpace, "#")
+strwrap(docs1)
+
+# Cleaning the Text
+docs1 = tm_map(docs1, content_transformer(tolower))
+docs1 = tm_map(docs1, removeNumbers)
+docs1 = tm_map(docs1, stripWhitespace)
+
+# Build a term-document matrix
+dtm = TermDocumentMatrix(docs)
+m = as.matrix(dtm)
+v = sort(rowSums(m), 
+         decreasing = TRUE)
+d = data.frame(word = names(v),
+               freq = v)
+head(d, 10)
+
+# Generate the Word cloud
+wordcloud(words = d$word, 
+          freq = d$freq,
+          min.freq = 1, 
+          max.words = 200,
+          random.order = FALSE, 
+          rot.per = 0.35, 
+          colors = brewer.pal(8, "Dark2"))
+```
+#Linear Regression
+```{r}
+#Slice the dataset
+size=chennai[,3]
+rent=chennai[,2]
+
+#Converting into dataframe
+data=data.frame(size,rent)
+tibble(data)
+```
+## Data splitting
+```{r}
+library(caTools)
+
+#Generating random numbers
+set.seed(42)
+
+#data splitting
+split = sample.split(data$rent,SplitRatio = 0.8)
+
+#Training data
+training_set = subset(data,split==TRUE)
+tibble(training_set)
+
+#testing data
+testing_set = subset(data,split==FALSE)
+tibble(testing_set)
+```
+#apply regression
+```{r}
+regressor = lm(formula = rent~size, data = training_set)
+```
+# prediction
+```{r}
+y_pred=predict(regressor,newdata = testing_set)
+tibble(y_pred)
+
+data1=data.frame(testing_set$rent, y_pred)
+tibble(data1)
+```
+#visualisation
+```{r}
+library(ggplot2)
+plot(testing_set$size,testing_set$rent, type='p', col='blue', xlab='GRE',ylab='COA')
+
+lines(testing_set$size,y_pred,type = 'o', col='red')
+```
+### ggplot
+```{r}
+ggplot(testing_set, aes(x = size))+
+  geom_point(aes(y = rent, color = 'Actual')) + 
+  geom_line(aes(y = y_pred, color = 'Predicted'))
+
+```
+# Evaluating metrics
+## Assessing Fit Of A Linear Regression Model: RSE
+```{r}
+summary(regressor)
+```
+#R squared value close to 1 data fits well
+
+# SVM
+```{r}
+#Dataset
+df<-chennai
+tibble(df)
+
+#libraries
+library(ggplot2)
+library(dplyr)
+library(e1071)
+```
+### plotting the df variables
+```{r}
+#Qplot
+qplot(Size, Rent, data=chennai, color=BHK)
+```
+#### Subsetting the data
+```{r}
+df<- subset(chennai, select = c(BHK, Rent, Size))
+tibble(df)
+```
+## model
+```{r}
+mymodel <-svm(BHK~.,data=df, kernel="radial")
+summary(mymodel)
+```
+### plot
+```{r}
+plot(mymodel,data=df, Rent~Size)
+```
+## Confusion Matrix
+```{r}
+pred=predict(mymodel,df)
+pred
+
+#confusion matrix
+tab = table(Predicted = pred,
+            Actual = df$BHK)
+View(tab)
+tab
+```
+
