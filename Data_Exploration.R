@@ -62,8 +62,6 @@ ggplot(chennai, aes(x="", y=Rent, fill=Area.Type)) +
 
 
 
-
-
 #Level 2 EDA
 
 #Scatter plot on House rents Vs House size
@@ -85,7 +83,6 @@ ggplot(chennai, aes(x=Bathroom)) + geom_histogram(binwidth = 1, fill="purple")
 
 
 #Level 3 EDA
-
 
 #Word cloud on Area Locality
 
