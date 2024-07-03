@@ -4,7 +4,6 @@
 
 View(chennai)
 
-
 #Slice the dataset
 size=chennai[,3]
 rent=chennai[,2]
@@ -20,7 +19,7 @@ library(caTools)
 #Generating random numbers
 set.seed(42)
 
-#data splitting
+#Data splitting
 split = sample.split(data$rent,SplitRatio = 0.8)
 View(split)
 print(split)
@@ -29,11 +28,11 @@ print(split)
 training_set = subset(data,split==TRUE)
 View(training_set)
 
-#testing data
+#Testing data
 testing_set = subset(data,split==FALSE)
 View(testing_set)
 
-#apply regression
+#Apply regression
 regressor = lm(formula = rent~size, data = training_set)
 View(regressor)
 
