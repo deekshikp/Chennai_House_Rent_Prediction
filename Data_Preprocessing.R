@@ -16,7 +16,6 @@ Chennai_rent$Area.Type=as.factor(Chennai_rent$Area.Type)
 Chennai_rent$Tenant.Preferred = as.factor(Chennai_rent$Tenant.Preferred)
 Chennai_rent$Furnishing.Status=as.factor(Chennai_rent$Furnishing.Status)
 Chennai_rent$Point.of.Contact=as.factor(Chennai_rent$Point.of.Contact)
-Chennai_rent$Area.Locality=as.character(Chennai_rent$Area.Locality)
 
 #Checking for null values
 is.na(Chennai_rent)
